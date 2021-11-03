@@ -14,6 +14,7 @@ import numpy as np
 from scipy.stats import invgamma
 from django.forms.models import model_to_dict
 import re
+import random
 # arguments to policies:
 
 # variables: list of variable objects, can be used to retrieve related data
@@ -461,7 +462,6 @@ def if_then_rules_time(variables, context):
 	return version_dict
 
 
-
 # Draw thompson sample of (reg. coeff., variance) and also select the optimal action
 def thompson_sampling_contextual(variables, context):
 	'''
@@ -503,7 +503,7 @@ def thompson_sampling_contextual(variables, context):
 		uniform_threshold = parameters["uniform_threshold"]
 	# number of current participants within uniform random threshold, random sample
 	if "uniform_threshold" in parameters and current_enrolled <= parameters["uniform_threshold"]:
-		ur_or_ts, created = Variable.objects.get_or_create(name="UR_or_TSCONTEXTUAL")
+		ur_or_ts, created = Variable.objects.get_or_create(name="UR_or_TS")
 		version_to_show = choice(context['mooclet'].version_set.all())
 		Value.objects.create(variable=ur_or_ts, value=0.0,
 							 text="UR_COLDSTART", learner=context["learner"], mooclet=context["mooclet"],
@@ -511,6 +511,13 @@ def thompson_sampling_contextual(variables, context):
 		version_dict = model_to_dict(version_to_show)
 		version_dict["selection_method"] = "uniform_random_coldstart"
 		return version_dict
+
+	if "epsilon_thresh" in policy_parameters:
+		epsilon_thresh = policy_parameters["epsilon_thresh"]
+		version_dict = epsilon(epsilon_thresh, context)
+		if version_dict is not None:
+			return version_dict
+
 	# Get current priors parameters (normal-inverse-gamma)
 	mean = parameters['coef_mean']
 	cov = parameters['coef_cov']
@@ -1220,10 +1227,12 @@ def ts_configurable(variables, context):
 	#max value of version rating, from qualtrics
 	min_rating, max_rating = policy_parameters["min_rating"] if "min_rating" in policy_parameters else 0, policy_parameters['max_rating']
 
+
 	if "batch_size" in policy_parameters:
 		batch_size = policy_parameters["batch_size"]
 	if "uniform_threshold" in policy_parameters:
 		uniform_threshold = policy_parameters["uniform_threshold"]
+
 	current_enrolled = Value.objects.filter(variable__name="version", mooclet=context["mooclet"], policy__name="ts_configurable").count()
 
 	#number of current participants within uniform random threshold, random sample
@@ -1236,6 +1245,12 @@ def ts_configurable(variables, context):
 		version_dict = model_to_dict(version_to_show)
 		version_dict["selection_method"] = "uniform_random_coldstart"
 		return version_dict
+
+	if "epsilon_thresh" in policy_parameters:
+		epsilon_thresh = policy_parameters["epsilon_thresh"]
+		version_dict = epsilon(epsilon_thresh, context)
+		if version_dict is not None:
+			return version_dict
 
 	if "current_posteriors" not in policy_parameters or current_enrolled % batch_size == 0 :
 		#update policyparameters
@@ -1290,6 +1305,22 @@ def ts_configurable(variables, context):
 		return ts_postdiff_sample(policy_parameters["tspostdiff_thresh"], version_dict, context)
 	else:
 		return ts_sample(version_dict, context)
+
+def epsilon(epsilon_thresh, context):
+	Variable = apps.get_model('engine', 'Variable')
+	Value = apps.get_model('engine', 'Value')
+	version_dict = None
+	pick = random.uniform(0, 1)
+
+	if pick < epsilon_thresh:
+		ur_or_ts, created = Variable.objects.get_or_create(name="UR_or_TS")
+		version_to_show = choice(context['mooclet'].version_set.all())
+		Value.objects.create(variable=ur_or_ts, value=0.0,
+							 text="UR_EPSILON", learner=context["learner"], mooclet=context["mooclet"],
+							 version=version_to_show)
+		version_dict = model_to_dict(version_to_show)
+		version_dict["selection_method"] = "uniform_random_coldstart"
+	return version_dict
 
 
 def ts_postdiff_sample(tspostdiff_thresh, versions_dict, context):
