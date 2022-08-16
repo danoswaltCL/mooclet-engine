@@ -44,6 +44,10 @@ jobs:
       - run:
           name: Build and validate
           command: |
+            . /home/circleci/venv/bin/activate
+            cd mooclet_engine
+            pwd
+            find .
             export DJANGO_SETTINGS_MODULE=mooclet_engine.settings.circle
             python manage.py migrate
             python manage.py test
