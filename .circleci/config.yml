@@ -48,7 +48,7 @@ jobs:
             cd mooclet_engine
             pwd
             find .
-            export DJANGO_SETTINGS_MODULE=mooclet_engine.circle
+            export DJANGO_SETTINGS_MODULE=mooclet_engine.settings.circle
             python manage.py migrate
             python manage.py test
             pylint engine
