@@ -41,7 +41,6 @@ path.append(SITE_ROOT)
 SECRET_KEY = 'CHANGEMECHANGEME'
 
 try:
-	# SECURITY WARNING: keep the secret key used in production secret!
 	SECRET_KEY = secure.SECRET_KEY
 except AttributeError:
 	pass
@@ -49,7 +48,12 @@ except AttributeError:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = secure.ALLOWED_HOSTS[os.environ['ENV_TYPE']]
+ALLOWED_HOSTS = [] 
+
+try:
+	ALLOWED_HOSTS = secure.ALLOWED_HOSTS[os.environ['ENV_TYPE']]
+except AttributeError:
+	pass
 
 INSTALLED_APPS = (
     'django.contrib.admin',
