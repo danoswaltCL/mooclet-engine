@@ -2,9 +2,10 @@
 -r requirements_base.txt
 
 # additional deployment requirements
-psycopg2
+psycopg2-binary==2.9.3; python_version >= '3.0'
 django-storages==1.6.6
-boto3
+boto3==1.20.26; python_version >= '3.0'
 #supervisor
 celery[sqs]==4.1.1
 django-celery-beat==1.5.0
+pandas==1.4.3
