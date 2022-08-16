@@ -1,3 +1,5 @@
+# pylint: disable=line-too-long, no-member
+
 from crypt import methods
 from rest_framework import viewsets
 from rest_pandas import PandasView
@@ -67,14 +69,14 @@ class MoocletViewSet(viewsets.ModelViewSet):
         if "mooclet" in serialized_version:
             version_shown.mooclet = Mooclet.objects.get(pk=serialized_version["mooclet"])
         version_shown.save()
-        
+
         if "policy" not in serialized_version:
             serialized_version["policy"] = self.get_object().policy.name
         if "policy_id" not in serialized_version:
             serialized_version["policy_id"] = self.get_object().policy.id
-        
+
         return Response(serialized_version)
-    
+
     @action(detail=True, methods=["post"])
     def run_with_arms(self, request, pk=None):
         req = dict(request.data)
@@ -82,7 +84,7 @@ class MoocletViewSet(viewsets.ModelViewSet):
         print("req: {}".format(request.data))
         print("get: {}".format(request.GET))
         policy = req.get('policy',None)
-        
+
         context = {}
         learner = None
         if req.get('user_id', None):
@@ -90,7 +92,7 @@ class MoocletViewSet(viewsets.ModelViewSet):
         elif req.get('learner', None):
             learner, created = Learner.objects.get_or_create(name=req.get('learner', None))
         context['learner'] = learner
-        
+
         # print(f"req: {req}")
         arms = req.get("arms", None)
         if arms is not None:
@@ -100,10 +102,10 @@ class MoocletViewSet(viewsets.ModelViewSet):
                 return Response({"error": "invalid arm set"}, status=400)
             context['allowed_versions'] = allowed_versions
             context['maximum_allowed'] = req.get("max_time", 20)
-            
+
             # print("allowed_versions: {}".format(context['allowed_versions']))
             # print("maximum_allowed: {}".format(context['maximum_allowed']))
-        
+
         version = self.get_object().run(context=context)
         #print version
         version_variable, created = Variable.objects.get_or_create(name='version')
@@ -132,12 +134,12 @@ class MoocletViewSet(viewsets.ModelViewSet):
         if "mooclet" in serialized_version:
             version_shown.mooclet = Mooclet.objects.get(pk=serialized_version["mooclet"])
         version_shown.save()
-        
+
         if "policy" not in serialized_version:
             serialized_version["policy"] = self.get_object().policy.name
         if "policy_id" not in serialized_version:
             serialized_version["policy_id"] = self.get_object().policy.id
-        
+
         return Response(serialized_version)
 
 class VersionViewSet(viewsets.ModelViewSet):
@@ -371,70 +373,70 @@ class ExportExcelValues(APIView):
             mooclet = Mooclet.objects.get(**mooclet_arg_dict)
         except:
             return Response({"error": "Mooclet not found"}, status=404)
-        
+
         # print("mooclet: {}".format(mooclet.pk))
-        
-        # Find a QuerySet instance of Version by version id or name. 
-        # This instance is optional. If no arguments are given, then look for 
+
+        # Find a QuerySet instance of Version by version id or name.
+        # This instance is optional. If no arguments are given, then look for
         # all version instance for the given mooclet.
         version_arg_dict = {"mooclet": mooclet}
         set_if_not_none(version_arg_dict, "pk", query_params.get("version", None))
         set_if_not_none(version_arg_dict, "name", query_params.get("version__name", None))
-        
+
         try:
             versions = Version.objects.filter(**version_arg_dict)
         except:
             return Response({"error": "Version not found"}, status=404)
-        
+
         # print("versions: {}".format(versions.query))
 
-        # Find a QuerySet instance of Learner by learner id or name. 
-        # This instance is optional. If no arguments are given, then look for 
+        # Find a QuerySet instance of Learner by learner id or name.
+        # This instance is optional. If no arguments are given, then look for
         # all learner instances for the given mooclet.
         learner_arg_dict = {}
         set_if_not_none(learner_arg_dict, "pk", query_params.get("learner", None))
         set_if_not_none(learner_arg_dict, "name", query_params.get("learner__name", None))
-        
+
         try:
             learners = Learner.objects.filter(**learner_arg_dict)
         except:
             return Response({"error": "Learner not found"}, status=404)
 
-        # Find a QuerySet instance for Variable by variable id or name. 
-        # This instance is optional. If no arguments are given, then look for 
+        # Find a QuerySet instance for Variable by variable id or name.
+        # This instance is optional. If no arguments are given, then look for
         # all variable instances for the given mooclet.
 
         # TODO: If user just give one veriable and ask for datadownloading, the csv file can be very different
-        #   from the default one. For example, we can only track such variable in the Value QuerySet and we 
+        #   from the default one. For example, we can only track such variable in the Value QuerySet and we
         #   don't have any information about whether this is a reward or a context, or something else.
-        #   One prototype: If user ONLY ask for one variable, then we give them a csv file of such variable. 
+        #   One prototype: If user ONLY ask for one variable, then we give them a csv file of such variable.
         #       Which means we don't need to map versions to such variable.
         variable_arg_dict = {}
         set_if_not_none(variable_arg_dict, "pk", query_params.get("variable", None))
         set_if_not_none(variable_arg_dict, "name", query_params.get("variable__name", None))
-        
+
         try:
             variables = Variable.objects.filter(**variable_arg_dict)
         except:
             return Response({"error": "Variable not found"}, status=404)
-        
+
         reward_arg_dict = {}
         set_if_not_none(reward_arg_dict, "pk", query_params.get("reward", None))
         set_if_not_none(reward_arg_dict, "name", query_params.get("reward__name", None))
-        
+
         try:
             reward_variables = Variable.objects.filter(**reward_arg_dict)
         except:
             return Response({"error": "Variable reward not found"}, status=404)
-        
+
         # print("GET REWARD: {}".format(reward_variables.query))
-        
-        # Find a QuerySet instance of Policy by policy id. 
-        # This instance is optional. If no arguments are given, then look for 
+
+        # Find a QuerySet instance of Policy by policy id.
+        # This instance is optional. If no arguments are given, then look for
         # all policy instances for the given mooclet.
         policy_arg_dict = {}
         set_if_not_none(policy_arg_dict, "pk", query_params.get("policy", None))
-        
+
         try:
             policies = Policy.objects.filter(**policy_arg_dict)
         except:
@@ -446,7 +448,7 @@ class ExportExcelValues(APIView):
         # 1) select_parameters - Policy parameters
         # Find a QuerySet of PolicyParameters instances by mooclet.
         select_parameters = PolicyParameters.objects.filter(mooclet=mooclet)
-        
+
         # Get a set of all variables and reward variables related to the mooclet instance.
         all_variables = []
         all_reward_variables = []
@@ -461,9 +463,9 @@ class ExportExcelValues(APIView):
                 for contextual_param_alias in self.VARIABLE_NAMES["contextual"]["aliases"]:
                     if contextual_param_alias in parameters:
                         all_variables += list(set(parameters[contextual_param_alias]) - set(all_variables))
-                
+
                 # print("contextual all variables: {}".format(all_variables))
-                
+
                 # Add all reward variables.
                 for reward_param_alias in self.VARIABLE_NAMES["reward"]["aliases"]:
                     if reward_param_alias in parameters:
@@ -472,19 +474,19 @@ class ExportExcelValues(APIView):
 
                 # print("all_variables: {}".format(all_variables))
                 # print("all_reward_variables: {}".format(all_reward_variables))
-        
+
         # Find all reward varaibles if reward is not specified.
         if len(all_reward_variables) != 0 and len(reward_arg_dict) == 0:
             reward_variables = variables.filter(name__in=all_reward_variables)
-        
-        # If no variable specified, update variables QuerySet so that only contains variables 
+
+        # If no variable specified, update variables QuerySet so that only contains variables
         # related to the mooclet instance.
         if len(all_variables) != 0:
             variables = variables.filter(name__in=all_variables)
         elif list(variables) == list(Variable.objects.all()):
             # Set variables to reward variables if there is no restriction to variables.
             variables = reward_variables.all()
-        
+
         if not reward_variables.exists():
             return Response({"error": "invalid reward"}, status=400)
 
@@ -498,8 +500,8 @@ class ExportExcelValues(APIView):
                 "policy": policies.first()
             }
             select_parameters = PolicyParameters.objects.filter(**select_parameters_kargs)
-            
-        # # If no policy specified, Update policies QuerySet so that only contains policies 
+
+        # # If no policy specified, Update policies QuerySet so that only contains policies
         # # related to the mooclet instance.
         # try:
         #     policy_list = list(Value.objects.filter(mooclet=mooclet).exclude(policy__isnull=True).values_list('policy').distinct())
@@ -527,19 +529,19 @@ class ExportExcelValues(APIView):
             set_if_not_none_non_json(select_values_kargs, "learner", learners.first())
         if len(variable_arg_dict) != 0:
             set_if_not_none_non_json(select_values_kargs, "variable", variables.first())
-        
+
         # Find a QuerySet object of Value by mooclet, learner, and variable.
         select_values = Value.objects.order_by("timestamp").filter(**select_values_kargs)
 
         # print("select_values: {}".format(select_values.query))
 
-        # version and policy can be NULL. 
+        # version and policy can be NULL.
         # Need to filter QuerySet value by version and policy but allow these two fields to be NULL.
         if len(version_arg_dict) != 0:
             select_values = select_values.filter(Q(version__isnull=True) | Q(version__in=versions))
         if len(policy_arg_dict) != 0:
             select_values = select_values.filter(Q(policy__isnull=True) | Q(policy__in=policies))
-        
+
         # Exclude all values which has NULL in learner and variable fields.
         select_values = select_values.exclude(Q(learner__isnull=True) | Q(variable__isnull=True))
 
@@ -566,7 +568,7 @@ class ExportExcelValues(APIView):
                     for param_history in single_param_histories:
                         curr_checkpoint = param_history.creation_time
 
-                        # Slice Value QuerySet by the creation_time of current checkpoint 
+                        # Slice Value QuerySet by the creation_time of current checkpoint
                         # and previous checkpoint (if exists).
                         if prev_checkpoint:
                             batch_values = policy_values.filter(
@@ -580,20 +582,20 @@ class ExportExcelValues(APIView):
                             break
 
                         data, columns = map_version_to_reward(
-                            batch_values, 
-                            mooclet, 
-                            policy, 
+                            batch_values,
+                            mooclet,
+                            policy,
                             reward_variables,
                             variables,
                             versions,
                             update_group=update_count,
                             policy_params_history=param_history
-                        )                            
+                        )
                         datapoint_frames.append(data)
-                        
+
                         prev_checkpoint = curr_checkpoint
                         update_count += 1
-                    
+
                     # Slice the last part of the batch values
                     if prev_checkpoint:
                         batch_values = policy_values.filter(Q(timestamp__gte=prev_checkpoint))
@@ -602,9 +604,9 @@ class ExportExcelValues(APIView):
 
                     if batch_values.exists():
                         data, columns = map_version_to_reward(
-                            batch_values, 
-                            mooclet, 
-                            policy, 
+                            batch_values,
+                            mooclet,
+                            policy,
                             reward_variables,
                             variables,
                             versions,
@@ -613,7 +615,7 @@ class ExportExcelValues(APIView):
                             sorted_by=query_params.get("sorted_by", "arm")
                         )
                         datapoint_frames.append(data)
-                    
+
                     # ONLY export excel file if dataframe is not empty.
                     if len(datapoint_frames) != 0:
                         policy_datapoints = pd.concat(datapoint_frames)
@@ -623,7 +625,7 @@ class ExportExcelValues(APIView):
                         if len(policy_datapoints.index) != 0:
                             policy_name_lst = policy.name.replace(" ", "_").split("_")
                             policy_datapoints.to_excel(
-                                writer, 
+                                writer,
                                 sheet_name="{}_{}".format("".join([c[0].upper() for c in policy_name_lst]), policy_idx),
                                 columns=columns
                             )
