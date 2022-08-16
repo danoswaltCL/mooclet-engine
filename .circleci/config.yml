@@ -50,7 +50,7 @@ jobs:
             touch mooclet_engine/settings/secure.py
             python manage.py migrate
             # python manage.py test
-            pylint engine
+            # pylint engine
             # pylint data_exchange
             bandit -r .
       - store_test_results:

@@ -684,7 +684,7 @@ def thompson_sampling_contextual(variables, context):
 	return version_to_show
 
 # Draw thompson sample of (reg. coeff., variance) and also select the optimal action
-def thompson_sampling_contextual_group(variables, context):
+def thompson_sampling_contextual_group(variables, context): # pylint: disable=invalid-name
 	'''
 	thompson sampling policy with contextual information.
 	Outcome is estimated using bayesian linear regression implemented by NIG conjugate priors.
