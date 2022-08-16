@@ -38,7 +38,7 @@ path.append(SITE_ROOT)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
-SECRET_KEY = 'CHANGEMECHANGEME'
+SECRET_KEY = 'CHANGEMECHANGEME' # nosec
 
 try:
 	SECRET_KEY = secure.SECRET_KEY
