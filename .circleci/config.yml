@@ -28,7 +28,7 @@ jobs:
           name: Build and validate
           command: |
             sudo apt-get update
-            sudo apt-get install build-essential python3-dev libldap2-dev libsasl2-dev slapd ldap-utils tox lcov valgrind
+            sudo apt-get install build-essential python3-dev libldap2-dev libsasl2-dev slapd ldap-utils tox lcov valgrind libblas-dev liblapack-dev gfortran
             git submodule init
             git submodule update
             python3 -m venv /home/circleci/venv --copies
