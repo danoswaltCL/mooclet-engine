@@ -36,17 +36,20 @@ jobs:
             cd mooclet_engine
             pip install --upgrade pip
             pip install --upgrade wheel
-            pip install -r requirements.txt --progress-bar off
+            pip install -r requirements.txt
+      - save_cache:
+          key: venv-38-{{ .Branch }}-{{ checksum "/home/circleci/project/mooclet_engine/requirements.txt" }}
+          paths:
+            - "/home/circleci/venv"
+      - run:
+          name: Build and validate
+          command: |
             export DJANGO_SETTINGS_MODULE=mooclet_engine.settings.circle
             python manage.py migrate
             python manage.py test
             pylint engine
             # pylint data_exchange
             bandit -r .
-      - save_cache:
-          key: venv-38-{{ .Branch }}-{{ checksum "/home/circleci/project/mooclet_engine/requirements.txt" }}
-          paths:
-            - "/home/circleci/venv"
       - store_test_results:
           path: test-results/
       - store_artifacts:
