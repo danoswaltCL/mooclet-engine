@@ -46,9 +46,8 @@ jobs:
           command: |
             . /home/circleci/venv/bin/activate
             cd mooclet_engine
-            pwd
-            find .
             export DJANGO_SETTINGS_MODULE=mooclet_engine.settings.circle
+            touch mooclet_engine/settings/secure.py
             python manage.py migrate
             python manage.py test
             pylint engine
